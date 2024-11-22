@@ -43,12 +43,20 @@ function CountdownTimer({ targetDate }: Props) {
     return () => clearTimeout(timer);
   });
 
+  // Mapeamento para traduzir os termos para português
+  const unitTranslations: { [key: string]: string } = {
+    days: 'Dias',
+    hours: 'Horas',
+    minutes: 'Minutos',
+    seconds: 'Segundos'
+  };
+
   return (
     <div className="grid grid-cols-4 gap-4 text-center">
       {Object.entries(timeLeft).map(([unit, value]) => (
         <div key={unit} className="bg-white bg-opacity-20 backdrop-blur-lg rounded-lg p-4">
           <div className="text-4xl font-bold">{value}</div>
-          <div className="text-sm uppercase">{unit}</div>
+          <div className="text-sm uppercase">{unitTranslations[unit] || unit}</div>
         </div>
       ))}
     </div>
