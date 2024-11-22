@@ -57,11 +57,51 @@ insert into settings (id, rsvp_enabled) values (1, false);
    ```
 7. Run the development server: `npm run dev`
 
-## Deployment
+## Netlify Deployment Configuration
 
-1. Create a new site on Netlify
-2. Connect your GitHub repository
-3. Add the environment variables in Netlify:
-   - VITE_SUPABASE_URL
-   - VITE_SUPABASE_ANON_KEY
-4. Deploy!
+### Build Settings
+
+1. **Runtime**: Automatically detected based on your project
+2. **Base directory**: Leave empty (project root)
+3. **Build command**: `npm run build`
+4. **Publish directory**: `dist`
+5. **Functions directory**: `netlify/functions`
+
+### Environment Variables
+
+Add the following environment variables in Netlify's site settings:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+### Deploy Settings
+
+1. **Deploy log visibility**: Choose between:
+   - Public logs: Anyone with deploy URL can access logs
+   - Private logs: Only site administrators can access logs
+
+2. **Build status**:
+   - Active builds: Automatic builds on Git push
+   - Stopped builds: Manual deployment only
+
+### Continuous Deployment
+
+1. Connect your GitHub repository
+2. Select the branch to deploy (usually `main` or `master`)
+3. Configure build settings as mentioned above
+4. Deploy the site
+
+### Post-Deployment
+
+1. Set up custom domain (if needed)
+2. Configure SSL/TLS certificate
+3. Test the deployed site thoroughly
+4. Monitor build and deployment logs
+
+### Troubleshooting
+
+If builds fail:
+1. Check build logs for errors
+2. Verify environment variables
+3. Ensure build command is correct
+4. Confirm publish directory is set to `dist`
+5. Check if dependencies are properly installed
