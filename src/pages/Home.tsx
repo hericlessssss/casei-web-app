@@ -10,15 +10,15 @@ function Home() {
         className="h-screen bg-cover bg-center flex items-center justify-center"
         style={{
           backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80")',
-          opacity: '0.3'
+          opacity: '1'
         }}
       >
         <div className="text-center text-white px-4">
           <div className="mb-8">
             <img 
-              src="/brasao.png" 
+              src="https://i.imgur.com/ssDvKgX.png" 
               alt="Brasão Héricles & Bruna" 
-              className="w-32 h-32 mx-auto mb-4"
+              className="w-40 h- mx-auto mb-4"
             />
           </div>
           <h1 className="font-serif text-4xl md:text-7xl mb-4 leading-tight">Héricles & Bruna</h1>
