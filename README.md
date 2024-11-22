@@ -18,8 +18,20 @@ This is a wedding gift registry website built with React, Vite, and Supabase. Th
 4. Create the following tables in your Supabase database:
 
 ```sql
--- Create gifts table
-create table gifts (
+-- Habilitar extensão para suporte a UUID
+create extension if not exists "uuid-ossp";
+
+-- Tabela de Convidados
+create table if not exists guests (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  email text unique not null,
+  phone text,
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- Tabela de Presentes
+create table if not exists gifts (
   id uuid default uuid_generate_v4() primary key,
   name text not null,
   price decimal not null,
@@ -27,27 +39,24 @@ create table gifts (
   description text not null,
   suggested_stores jsonb not null,
   reserved boolean default false,
-  reserved_by text,
+  reserved_by uuid references guests(id),
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
--- Create settings table
-create table settings (
+-- Tabela de Configurações
+create table if not exists settings (
   id serial primary key,
   rsvp_enabled boolean default false
 );
+```
 
--- Create rsvp table
-create table rsvp (
+-- Tabela de Confirmações de Presença
+create table if not exists rsvp (
   id uuid default uuid_generate_v4() primary key,
-  name text not null,
-  guests integer not null,
+  guest_id uuid references guests(id),
+  guests_count integer not null,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
-
--- Insert initial settings
-insert into settings (id, rsvp_enabled) values (1, false);
-```
 
 5. Copy your Supabase URL and anon key from the project settings
 6. Create a `.env` file with the following variables:
