@@ -11,9 +11,8 @@ function Footer() {
         </div>
         <p className="text-olive-100 mb-4">19 de julho de 2025</p>
         <p className="text-olive-200 text-sm">
-          Desenvolvido com muito amor e carinho pela
+          Desenvolvido com muito amor e carinho pela Labora Design.
           <br />
-          <span className="font-serif text-lg">Labora Design</span>
         </p>
       </div>
     </footer>
