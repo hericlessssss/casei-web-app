@@ -21,7 +21,7 @@ function Home() {
               className="w-40 h- mx-auto mb-4"
             />
           </div>
-          <h1 className="font-serif text-4xl md:text-7xl mb-4 leading-tight">Héricles & Bruna</h1>
+          <h1 className="font-serif text-xl md:text-7xl mb-4 leading-tight">Héricles & Bruna</h1>
           <p className="text-xl md:text-2xl mb-8">19 de julho de 2025</p>
           <div className="max-w-xs md:max-w-2xl mx-auto">
             <CountdownTimer targetDate="2025-07-19T14:30:00" />
