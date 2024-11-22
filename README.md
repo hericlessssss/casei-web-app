@@ -57,6 +57,24 @@ insert into settings (id, rsvp_enabled) values (1, false);
    ```
 7. Run the development server: `npm run dev`
 
+## Admin Access
+
+To access the admin panel:
+
+1. Navigate to `/admin` route in your browser
+2. The admin panel allows you to:
+   - Add new gifts to the registry
+   - Enable/disable RSVP functionality
+   - View reserved gifts and RSVP confirmations
+   - Manage gift details and availability
+
+Note: Currently, the admin panel requires proper authentication setup in Supabase. To implement authentication:
+
+1. Enable Email auth provider in Supabase Authentication settings
+2. Create an admin user through Supabase Authentication
+3. Update the admin route to require authentication
+4. Set up proper row level security (RLS) policies in Supabase
+
 ## Netlify Deployment Configuration
 
 ### Build Settings
