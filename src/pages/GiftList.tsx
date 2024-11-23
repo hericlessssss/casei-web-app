@@ -84,12 +84,12 @@ const GiftList: React.FC = () => {
               className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02]"
             >
               <div className="relative pb-[66.67%]">
-                <img
-                  src={gift.image}
-                  alt={gift.name}
-                  className="absolute top-0 left-0 w-full h-full object-contain"
-                />
-              </div>
+            <img
+              src={gift.image}
+              alt={gift.name}
+              className="absolute top-0 left-0 w-full h-full object-contain"
+            />
+          </div>
 
               <div className="p-4 md:p-6">
                 <h3 className="font-serif text-lg md:text-xl text-olive-800 mb-2">{gift.name}</h3>
