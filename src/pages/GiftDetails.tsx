@@ -4,7 +4,7 @@ import { ExternalLink, Gift as GiftIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../supabase/supabaseClient'; // Importando o cliente Supabase
 
-// Definindo tipos para o presente e loja sugerida
+// Tipos para o presente e loja sugerida
 interface Store {
   name: string;
   url: string;
@@ -24,31 +24,78 @@ interface Gift {
 function GiftDetails() {
   const { id } = useParams<{ id: string }>(); // ID do presente na URL
   const navigate = useNavigate(); // Para redirecionar o usuário após a reserva
-  const [gift, setGift] = useState<Gift | null>(null); // Usando 'Gift' como tipo
-  const [name, setName] = useState<string>(''); // Tipo para o nome
+  const [gift, setGift] = useState<Gift | null>(null); // Armazena os dados do presente
+  const [name, setName] = useState<string>(''); // Armazena o nome do usuário
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Indicador de envio do formulário
+  const [loading, setLoading] = useState<boolean>(true); // Indicador de carregamento dos dados
 
-  // Buscar os dados do presente assim que o componente for montado
+  // Buscar os dados do presente ao montar o componente
   useEffect(() => {
     async function fetchGift() {
-      const { data, error } = await supabase
-        .from('gifts')
-        .select('*')
-        .eq('id', id)
-        .single(); // Espera um único registro (o presente)
+      try {
+        const { data, error } = await supabase
+          .from('gifts')
+          .select('*')
+          .eq('id', id)
+          .single(); // Busca um único presente pelo ID
 
-      if (error) {
-        console.error('Erro ao buscar o presente:', error);
-        toast.error('Erro ao buscar o presente.');
-      } else {
-        setGift(data);
+        if (error) {
+          console.error('Erro ao buscar o presente:', error.message);
+          toast.error('Erro ao buscar o presente.');
+        } else {
+          setGift(data);
+        }
+      } catch (err) {
+        console.error('Erro inesperado ao buscar presente:', err);
+        toast.error('Erro inesperado ao buscar o presente.');
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchGift();
   }, [id]);
 
-  // Caso o presente não seja encontrado, exibe uma mensagem
+  // Função que manipula o envio do formulário de reserva
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error('Por favor, informe seu nome.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('gifts')
+        .update({ reserved: true, reserved_by: name })
+        .eq('id', gift?.id);
+
+      if (error) {
+        console.error('Erro ao reservar o presente:', error.message);
+        toast.error('Erro ao reservar o presente.');
+      } else {
+        toast.success('Presente reservado com sucesso! Obrigado!');
+        navigate('/gifts'); // Redireciona para a lista de presentes
+      }
+    } catch (err) {
+      console.error('Erro inesperado ao reservar o presente:', err);
+      toast.error('Erro inesperado ao reservar o presente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Carregando dados do presente...</p>
+      </div>
+    );
+  }
+
   if (!gift) {
     return (
       <div className="min-h-screen pt-20 px-4 flex items-center justify-center">
@@ -56,32 +103,6 @@ function GiftDetails() {
       </div>
     );
   }
-
-  // Função que manipula o envio do formulário de reserva
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      toast.error('Por favor, informe seu nome');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    // Atualizando o status de reserva no banco de dados
-    const { error } = await supabase
-      .from('gifts')
-      .update({ reserved: true, reserved_by: name })  // Atualizando a reserva e quem reservou
-      .eq('id', gift.id);
-
-    if (error) {
-      toast.error('Erro ao reservar o presente');
-      setIsSubmitting(false);
-      return;
-    }
-
-    toast.success('Presente reservado com sucesso! Obrigado!');
-    navigate('/gifts');  // Redireciona de volta para a lista de presentes
-  };
 
   return (
     <div className="min-h-screen pt-20 pb-12 px-4">
@@ -123,7 +144,7 @@ function GiftDetails() {
               {gift.reserved ? (
                 <div className="text-olive-600 font-medium flex items-center">
                   <GiftIcon className="w-5 h-5 mr-2" />
-                  Presente já escolhido
+                  Presente já escolhido por {gift.reserved_by || 'alguém'}.
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>

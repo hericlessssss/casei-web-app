@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../supabase/supabaseClient';  // Importando o cliente
+import { supabase } from '../supabase/supabaseClient'; // Importando o cliente
 import { Link } from 'react-router-dom';
 import { Gift as GiftIcon } from 'lucide-react';
 
@@ -13,18 +13,45 @@ interface Gift {
 
 const GiftList: React.FC = () => {
   const [gifts, setGifts] = useState<Gift[]>([]);
+  const [loading, setLoading] = useState(true); // Para indicar carregamento
+  const [error, setError] = useState<string | null>(null); // Para erros
 
   useEffect(() => {
     async function fetchGifts() {
-      const { data, error } = await supabase.from<Gift>('gifts').select('*');  // Supondo que a tabela no seu banco de dados se chame "gifts"
-      if (error) {
-        console.error('Erro ao buscar os dados:', error);
-      } else {
-        setGifts(data || []);
+      try {
+        const { data, error } = await supabase.from<Gift>('gifts').select('*'); // Supondo que a tabela no seu banco de dados se chame "gifts"
+        if (error) {
+          console.error('Erro ao buscar os dados da API Supabase:', error.message);
+          setError('Erro ao carregar a lista de presentes. Tente novamente mais tarde.');
+        } else if (data) {
+          setGifts(data);
+        }
+      } catch (err) {
+        console.error('Erro inesperado ao buscar presentes:', err);
+        setError('Erro inesperado ao carregar a lista de presentes.');
+      } finally {
+        setLoading(false);
       }
     }
+
     fetchGifts();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Carregando presentes...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-600 text-lg">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-16 md:pt-20 pb-12 px-4">
@@ -41,7 +68,7 @@ const GiftList: React.FC = () => {
           {gifts.map((gift) => (
             <div
               key={gift.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-102"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02]"
             >
               <div className="relative pb-[66.67%]">
                 <img
