@@ -13,18 +13,23 @@ interface Gift {
 
 const GiftList: React.FC = () => {
   const [gifts, setGifts] = useState<Gift[]>([]);
-  const [loading, setLoading] = useState(true); // Para indicar carregamento
-  const [error, setError] = useState<string | null>(null); // Para erros
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchGifts() {
+      setLoading(true);
       try {
-        const { data, error } = await supabase.from<Gift>('gifts').select('*'); // Supondo que a tabela no seu banco de dados se chame "gifts"
+        const { data, error } = await supabase.from<Gift>('gifts').select('*');
         if (error) {
           console.error('Erro ao buscar os dados da API Supabase:', error.message);
           setError('Erro ao carregar a lista de presentes. Tente novamente mais tarde.');
         } else if (data) {
-          setGifts(data);
+          // Filtrar IDs duplicados para evitar warnings no React
+          const uniqueGifts = data.filter(
+            (gift, index, self) => index === self.findIndex((g) => g.id === gift.id)
+          );
+          setGifts(uniqueGifts);
         }
       } catch (err) {
         console.error('Erro inesperado ao buscar presentes:', err);
@@ -49,6 +54,14 @@ const GiftList: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-red-600 text-lg">{error}</p>
+      </div>
+    );
+  }
+
+  if (gifts.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Nenhum presente disponível no momento.</p>
       </div>
     );
   }

@@ -16,54 +16,58 @@ This is a wedding gift registry website built with React, Vite, and Supabase. Th
 2. Install dependencies: `npm install`
 3. Create a Supabase account and project at https://supabase.com
 4. Create the following tables in your Supabase database:
-
-```sql
 -- Habilitar extensão para suporte a UUID
-create extension if not exists "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Tabela de Convidados
-create table if not exists guests (
-  id uuid default uuid_generate_v4() primary key,
-  name text not null,
-  email text unique not null,
-  phone text,
-  created_at timestamp with time zone default timezone('utc'::text, now())
+CREATE TABLE IF NOT EXISTS guests (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
 -- Tabela de Presentes
-create table if not exists gifts (
-  id uuid default uuid_generate_v4() primary key,
-  name text not null,
-  price decimal not null,
-  image text not null,
-  description text not null,
-  suggested_stores jsonb not null,
-  reserved boolean default false,
-  reserved_by uuid references guests(id),
-  created_at timestamp with time zone default timezone('utc'::text, now())
+CREATE TABLE IF NOT EXISTS gifts (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name TEXT NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    image TEXT NOT NULL,
+    description TEXT NOT NULL,
+    suggested_stores JSONB NOT NULL,
+    reserved BOOLEAN DEFAULT FALSE,
+    reserved_by UUID REFERENCES guests(id), -- Relaciona a quem reservou
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
+
+-- Garantir que cada presente só possa ser reservado uma vez
+CREATE UNIQUE INDEX IF NOT EXISTS unique_gift_reservation 
+ON gifts (id, reserved) WHERE reserved = TRUE;
 
 -- Tabela de Configurações
-create table if not exists settings (
-  id serial primary key,
-  rsvp_enabled boolean default false
+CREATE TABLE IF NOT EXISTS settings (
+    id SERIAL PRIMARY KEY,
+    rsvp_enabled BOOLEAN DEFAULT FALSE -- Controle para ativar/desativar RSVP
 );
-```
 
 -- Tabela de Confirmações de Presença
-create table if not exists rsvp (
-  id uuid default uuid_generate_v4() primary key,
-  guest_id uuid references guests(id),
-  guests_count integer not null,
-  created_at timestamp with time zone default timezone('utc'::text, now())
+CREATE TABLE IF NOT EXISTS rsvp (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    guest_id UUID REFERENCES guests(id) ON DELETE CASCADE, -- Relacionado ao convidado
+    guests_count INTEGER NOT NULL CHECK (guests_count > 0), -- Número de acompanhantes (mínimo 1)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
-5. Copy your Supabase URL and anon key from the project settings
-6. Create a `.env` file with the following variables:
-   ```
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+-- Tabela de Logs de Escolhas (Histórico de Reservas)
+CREATE TABLE IF NOT EXISTS reservation_logs (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    gift_id UUID REFERENCES gifts(id) ON DELETE CASCADE, -- Relacionado ao presente
+    guest_id UUID REFERENCES guests(id) ON DELETE CASCADE, -- Relacionado ao convidado
+    action TEXT NOT NULL CHECK (action IN ('reserved', 'unreserved')), -- Registro da ação
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
 7. Run the development server: `npm run dev`
 
 ## Admin Access

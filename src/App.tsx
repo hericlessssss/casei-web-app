@@ -20,6 +20,14 @@ function App() {
           <Route path="/gifts/:id" element={<GiftDetails />} />
           <Route path="/rsvp" element={<RSVP />} />
           <Route path="/admin" element={<Admin />} />
+          <Route
+            path="*"
+            element={
+              <div className="min-h-screen flex items-center justify-center">
+                <p className="text-gray-600">Página não encontrada</p>
+              </div>
+            }
+          />
         </Routes>
         <Footer />
         <Toaster position="bottom-center" />

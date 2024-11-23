@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ExternalLink, Gift as GiftIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { supabase } from '../supabase/supabaseClient'; // Importando o cliente Supabase
+import { supabase } from '../supabase/supabaseClient';
 
-// Tipos para o presente e loja sugerida
 interface Store {
   name: string;
   url: string;
 }
 
 interface Gift {
-  id: number;
+  id: string;
   name: string;
   price: number;
   description: string;
@@ -22,31 +21,34 @@ interface Gift {
 }
 
 function GiftDetails() {
-  const { id } = useParams<{ id: string }>(); // ID do presente na URL
-  const navigate = useNavigate(); // Para redirecionar o usuário após a reserva
-  const [gift, setGift] = useState<Gift | null>(null); // Armazena os dados do presente
-  const [name, setName] = useState<string>(''); // Armazena o nome do usuário
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Indicador de envio do formulário
-  const [loading, setLoading] = useState<boolean>(true); // Indicador de carregamento dos dados
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [gift, setGift] = useState<Gift | null>(null);
+  const [name, setName] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Buscar os dados do presente ao montar o componente
   useEffect(() => {
     async function fetchGift() {
+      if (!id) {
+        toast.error('ID do presente inválido.');
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase
           .from('gifts')
           .select('*')
           .eq('id', id)
-          .single(); // Busca um único presente pelo ID
+          .single();
 
         if (error) {
-          console.error('Erro ao buscar o presente:', error.message);
           toast.error('Erro ao buscar o presente.');
         } else {
           setGift(data);
         }
       } catch (err) {
-        console.error('Erro inesperado ao buscar presente:', err);
         toast.error('Erro inesperado ao buscar o presente.');
       } finally {
         setLoading(false);
@@ -56,7 +58,6 @@ function GiftDetails() {
     fetchGift();
   }, [id]);
 
-  // Função que manipula o envio do formulário de reserva
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,20 +69,43 @@ function GiftDetails() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // Tentar encontrar o convidado pelo nome
+      const { data: guestData, error: guestError } = await supabase
+        .from('guests')
+        .select('id')
+        .eq('name', name.trim())
+        .single();
+
+      let guestId = guestData?.id;
+
+      // Se o convidado não existir, cria um novo
+      if (!guestId) {
+        const { data: newGuest, error: newGuestError } = await supabase
+          .from('guests')
+          .insert({ name })
+          .select('id')
+          .single();
+
+        if (newGuestError) {
+          throw new Error('Erro ao criar convidado: ' + newGuestError.message);
+        }
+
+        guestId = newGuest.id;
+      }
+
+      // Atualizar o presente com o ID do convidado
+      const { error: giftError } = await supabase
         .from('gifts')
-        .update({ reserved: true, reserved_by: name })
+        .update({ reserved: true, reserved_by: guestId })
         .eq('id', gift?.id);
 
-      if (error) {
-        console.error('Erro ao reservar o presente:', error.message);
+      if (giftError) {
         toast.error('Erro ao reservar o presente.');
       } else {
         toast.success('Presente reservado com sucesso! Obrigado!');
-        navigate('/gifts'); // Redireciona para a lista de presentes
+        navigate('/gifts');
       }
     } catch (err) {
-      console.error('Erro inesperado ao reservar o presente:', err);
       toast.error('Erro inesperado ao reservar o presente.');
     } finally {
       setIsSubmitting(false);
@@ -126,9 +150,9 @@ function GiftDetails() {
               <div className="mb-8">
                 <h2 className="font-serif text-xl text-olive-800 mb-3">Onde comprar:</h2>
                 <div className="space-y-2">
-                  {gift.suggestedStores.map((store, index) => (
+                  {gift.suggestedStores?.map((store, index) => (
                     <a
-                      key={index}
+                      key={store.name + index}
                       href={store.url}
                       target="_blank"
                       rel="noopener noreferrer"
