@@ -4,12 +4,29 @@ import { ExternalLink, Gift as GiftIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../supabase/supabaseClient'; // Importando o cliente Supabase
 
+// Definindo tipos para o presente e loja sugerida
+interface Store {
+  name: string;
+  url: string;
+}
+
+interface Gift {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  image: string;
+  reserved: boolean;
+  reserved_by?: string;
+  suggestedStores: Store[];
+}
+
 function GiftDetails() {
-  const { id } = useParams();  // ID do presente na URL
-  const navigate = useNavigate();  // Para redirecionar o usuário após a reserva
-  const [gift, setGift] = useState<any>(null);  // Usando 'any' para facilitar o tipo inicial
-  const [name, setName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { id } = useParams<{ id: string }>(); // ID do presente na URL
+  const navigate = useNavigate(); // Para redirecionar o usuário após a reserva
+  const [gift, setGift] = useState<Gift | null>(null); // Usando 'Gift' como tipo
+  const [name, setName] = useState<string>(''); // Tipo para o nome
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Indicador de envio do formulário
 
   // Buscar os dados do presente assim que o componente for montado
   useEffect(() => {
@@ -18,7 +35,7 @@ function GiftDetails() {
         .from('gifts')
         .select('*')
         .eq('id', id)
-        .single();  // Espera um único registro (o presente)
+        .single(); // Espera um único registro (o presente)
 
       if (error) {
         console.error('Erro ao buscar o presente:', error);

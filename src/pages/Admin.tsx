@@ -23,7 +23,7 @@ function Admin() {
       .from('settings')
       .select('rsvp_enabled')
       .single();
-    
+
     if (!error && data) {
       setRsvpEnabled(data.rsvp_enabled);
     }
@@ -98,7 +98,7 @@ function Admin() {
     <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="font-serif text-3xl text-olive-800 mb-8">Administração</h1>
-        
+
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="font-serif text-xl text-olive-800 mb-4">Configurações</h2>
           <button
