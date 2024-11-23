@@ -104,7 +104,7 @@ function Admin() {
           <button
             onClick={toggleRSVP}
             className={`px-4 py-2 rounded-md ${
-              rsvpEnabled ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+              rsvpEnabled ? 'bg-red-500 hover:bg-red-600' : 'bg-olive-600 hover:bg-olive-600'
             } text-white transition-colors`}
           >
             {rsvpEnabled ? 'Desabilitar' : 'Habilitar'} Confirmações

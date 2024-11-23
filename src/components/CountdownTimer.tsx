@@ -53,14 +53,20 @@ function CountdownTimer({ targetDate }: Props) {
 
   return (
     <div className="grid grid-cols-4 gap-4 text-center">
-      {Object.entries(timeLeft).map(([unit, value]) => (
-        <div key={unit} className="bg-white bg-opacity-20 backdrop-blur-lg rounded-lg p-4">
-          <div className="text-4xl font-bold">{value}</div>
-          <div className="text-sm uppercase">{unitTranslations[unit] || unit}</div>
-        </div>
-      ))}
+  {Object.entries(timeLeft).map(([unit, value]) => (
+    <div
+      key={unit}
+      className="bg-white bg-opacity-20 backdrop-blur-lg rounded-lg p-4 flex flex-col items-center"
+    >
+      <div className="text-2xl md:text-4xl font-bold">{value}</div>
+      <div className="text-xs md:text-sm uppercase">{unitTranslations[unit] || unit}</div>
     </div>
+  ))}
+</div>
+
+
   );
 }
+
 
 export default CountdownTimer;

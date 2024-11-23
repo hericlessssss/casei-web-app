@@ -19,9 +19,10 @@ function Home() {
             Héricles & Bruna
           </h1>
           <p className="text-lg md:text-2xl mb-12 font-light">19 de julho de 2025</p>
-          <div className="max-w-xs md:max-w-2xl mx-auto">
+          <div className="max-w-xs md:max-w-2xl mx-auto text-sm md:text-lg">
             <CountdownTimer targetDate="2025-07-19T14:30:00" />
           </div>
+
         </div>
       </section>
 
