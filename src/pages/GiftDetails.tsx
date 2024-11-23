@@ -17,7 +17,7 @@ interface Gift {
   image: string;
   reserved: boolean;
   reserved_by?: string;
-  suggestedStores: Store[];
+  suggested_stores: Store[];
 }
 
 function GiftDetails() {
@@ -133,15 +133,18 @@ function GiftDetails() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="md:flex">
-            <div className="md:w-1/2">
-              <img
-                src={gift.image}
-                alt={gift.name}
-                className="w-full h-64 md:h-full object-cover"
-              />
-            </div>
+
+          <div className="md:w-1/2">
+            <img
+              src={gift.image}
+              alt={gift.name}
+              className="w-full h-64 md:h-full object-contain"
+            />
+          </div>
+
+            
             <div className="p-8 md:w-1/2">
-              <h1 className="font-serif text-3xl text-olive-800 mb-4">{gift.name}</h1>
+            <h1 className="font-serif text-3xl text-olive-800 mb-4">{gift.name}</h1>
               <p className="text-2xl text-olive-600 mb-4">
                 R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
@@ -150,20 +153,25 @@ function GiftDetails() {
               <div className="mb-8">
                 <h2 className="font-serif text-xl text-olive-800 mb-3">Onde comprar:</h2>
                 <div className="space-y-2">
-                  {gift.suggestedStores?.map((store, index) => (
-                    <a
-                      key={store.name + index}
-                      href={store.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-olive-600 hover:text-olive-700"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      {store.name}
-                    </a>
-                  ))}
+                  {gift.suggested_stores?.length > 0 ? (
+                    gift.suggested_stores.map((store, index) => (
+                      <a
+                        key={store.url + index}
+                        href={store.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center text-olive-600 hover:text-olive-700"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        {store.name || "Loja sem nome"}
+                      </a>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">Nenhuma loja disponível no momento.</p>
+                  )}
                 </div>
               </div>
+
 
               {gift.reserved ? (
                 <div className="text-olive-600 font-medium flex items-center">
