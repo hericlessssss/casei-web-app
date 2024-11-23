@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 function Admin() {
   const [formData, setFormData] = useState({
@@ -29,6 +30,7 @@ function Admin() {
     }
   };
 
+  
   const handleStoreChange = (index: number, field: 'name' | 'url', value: string) => {
     const newStores = [...formData.stores];
     newStores[index][field] = value;
@@ -93,6 +95,8 @@ function Admin() {
       toast.error('Erro ao atualizar configurações');
     }
   };
+  
+  
 
   return (
     <div className="min-h-screen pt-20 pb-12 px-4">
@@ -109,6 +113,16 @@ function Admin() {
           >
             {rsvpEnabled ? 'Desabilitar' : 'Habilitar'} Confirmações
           </button>
+        </div>
+            
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="font-serif text-xl text-olive-800 mb-4">Gerenciar Presentes</h2>
+          <Link
+            to="/gift-management"
+            className="w-full bg-olive-600 text-white px-6 py-3 rounded-md hover:bg-olive-700 transition-colors"
+          >
+            Gerenciar Presentes
+          </Link>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">

@@ -8,6 +8,7 @@ import GiftDetails from './pages/GiftDetails';
 import RSVP from './pages/RSVP';
 import Footer from './components/Footer';
 import Admin from './pages/Admin';
+import GiftManagement from './pages/GiftManagement';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/gifts" element={<GiftList />} />
           <Route path="/gifts/:id" element={<GiftDetails />} />
+          <Route path="/gift-management" element={<GiftManagement />} />
           <Route path="/rsvp" element={<RSVP />} />
           <Route path="/admin" element={<Admin />} />
           <Route
