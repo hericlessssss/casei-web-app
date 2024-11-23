@@ -1,9 +1,31 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../supabase/supabaseClient';  // Importando o cliente
 import { Link } from 'react-router-dom';
 import { Gift as GiftIcon } from 'lucide-react';
-import { gifts } from '../data/gifts';
 
-function GiftList() {
+interface Gift {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  reserved: boolean;
+}
+
+const GiftList: React.FC = () => {
+  const [gifts, setGifts] = useState<Gift[]>([]);
+
+  useEffect(() => {
+    async function fetchGifts() {
+      const { data, error } = await supabase.from<Gift>('gifts').select('*');  // Supondo que a tabela no seu banco de dados se chame "gifts"
+      if (error) {
+        console.error('Erro ao buscar os dados:', error);
+      } else {
+        setGifts(data || []);
+      }
+    }
+    fetchGifts();
+  }, []);
+
   return (
     <div className="min-h-screen pt-16 md:pt-20 pb-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -53,6 +75,6 @@ function GiftList() {
       </div>
     </div>
   );
-}
+};
 
 export default GiftList;

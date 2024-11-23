@@ -1,4 +1,9 @@
 import { Gift } from '../types/gift';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://sua-url.supabase.co'; // Coloque a URL do seu projeto Supabase
+const supabaseKey = 'sua-chave-de-api'; // Coloque a chave do Supabase (API Key)
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const gifts: Gift[] = [
   {

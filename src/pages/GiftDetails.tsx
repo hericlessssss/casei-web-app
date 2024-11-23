@@ -1,17 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ExternalLink, Gift as GiftIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { gifts } from '../data/gifts';
+import { supabase } from '../supabase/supabaseClient'; // Importando o cliente Supabase
 
 function GiftDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams();  // ID do presente na URL
+  const navigate = useNavigate();  // Para redirecionar o usuário após a reserva
+  const [gift, setGift] = useState<any>(null);  // Usando 'any' para facilitar o tipo inicial
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const gift = gifts.find(g => g.id === id);
+  // Buscar os dados do presente assim que o componente for montado
+  useEffect(() => {
+    async function fetchGift() {
+      const { data, error } = await supabase
+        .from('gifts')
+        .select('*')
+        .eq('id', id)
+        .single();  // Espera um único registro (o presente)
 
+      if (error) {
+        console.error('Erro ao buscar o presente:', error);
+        toast.error('Erro ao buscar o presente.');
+      } else {
+        setGift(data);
+      }
+    }
+
+    fetchGift();
+  }, [id]);
+
+  // Caso o presente não seja encontrado, exibe uma mensagem
   if (!gift) {
     return (
       <div className="min-h-screen pt-20 px-4 flex items-center justify-center">
@@ -20,6 +40,7 @@ function GiftDetails() {
     );
   }
 
+  // Função que manipula o envio do formulário de reserva
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -28,16 +49,21 @@ function GiftDetails() {
     }
 
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Update gift status (in a real app, this would be handled by the backend)
-    gift.reserved = true;
-    gift.reservedBy = name;
-    
+
+    // Atualizando o status de reserva no banco de dados
+    const { error } = await supabase
+      .from('gifts')
+      .update({ reserved: true, reserved_by: name })  // Atualizando a reserva e quem reservou
+      .eq('id', gift.id);
+
+    if (error) {
+      toast.error('Erro ao reservar o presente');
+      setIsSubmitting(false);
+      return;
+    }
+
     toast.success('Presente reservado com sucesso! Obrigado!');
-    navigate('/gifts');
+    navigate('/gifts');  // Redireciona de volta para a lista de presentes
   };
 
   return (
