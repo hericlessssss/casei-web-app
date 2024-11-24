@@ -9,6 +9,8 @@ import RSVP from './pages/RSVP';
 import Footer from './components/Footer';
 import Admin from './pages/Admin';
 import GiftManagement from './pages/GiftManagement';
+import PrivateRoute from './components/PrivateRoute';
+import Login from './pages/Login'; // Certifique-se de que esta página exista
 
 function App() {
   return (
@@ -19,9 +21,24 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/gifts" element={<GiftList />} />
           <Route path="/gifts/:id" element={<GiftDetails />} />
-          <Route path="/gift-management" element={<GiftManagement />} />
           <Route path="/rsvp" element={<RSVP />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <Admin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gift-management"
+            element={
+              <PrivateRoute>
+                <GiftManagement />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="*"
             element={

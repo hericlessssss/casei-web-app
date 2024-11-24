@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Admin() {
   const [formData, setFormData] = useState({
@@ -14,23 +14,30 @@ function Admin() {
   });
   const [rsvpEnabled, setRsvpEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRSVPStatus();
   }, []);
 
   const fetchRSVPStatus = async () => {
-    const { data, error } = await supabase
-      .from('settings')
-      .select('rsvp_enabled')
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('rsvp_enabled')
+        .limit(1)
+        .single();
 
-    if (!error && data) {
-      setRsvpEnabled(data.rsvp_enabled);
+      if (error) throw error;
+      if (data) {
+        setRsvpEnabled(data.rsvp_enabled);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar status de RSVP:', error.message);
+      toast.error('Erro ao buscar status de RSVP.');
     }
   };
 
-  
   const handleStoreChange = (index: number, field: 'name' | 'url', value: string) => {
     const newStores = [...formData.stores];
     newStores[index][field] = value;
@@ -54,14 +61,16 @@ function Admin() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from('gifts').insert([{
-        name: formData.name,
-        price: parseFloat(formData.price),
-        image: formData.image,
-        description: formData.description,
-        suggested_stores: formData.stores,
-        reserved: false
-      }]);
+      const { error } = await supabase.from('gifts').insert([
+        {
+          name: formData.name,
+          price: parseFloat(formData.price),
+          image: formData.image,
+          description: formData.description,
+          suggested_stores: formData.stores,
+          reserved: false
+        }
+      ]);
 
       if (error) throw error;
 
@@ -74,7 +83,8 @@ function Admin() {
         stores: [{ name: '', url: '' }]
       });
     } catch (error) {
-      toast.error('Erro ao adicionar presente');
+      toast.error('Erro ao adicionar presente.');
+      console.error('Erro ao adicionar presente:', error.message);
     } finally {
       setLoading(false);
     }
@@ -90,31 +100,56 @@ function Admin() {
       if (error) throw error;
 
       setRsvpEnabled(!rsvpEnabled);
-      toast.success(`Confirmações de presença ${!rsvpEnabled ? 'habilitadas' : 'desabilitadas'}`);
+      toast.success(
+        `Confirmações de presença ${!rsvpEnabled ? 'habilitadas' : 'desabilitadas'}.`
+      );
     } catch (error) {
-      toast.error('Erro ao atualizar configurações');
+      toast.error('Erro ao atualizar configurações.');
+      console.error('Erro ao atualizar configurações:', error.message);
     }
   };
-  
-  
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      toast.success('Logout realizado com sucesso.');
+      navigate('/login'); // Redireciona para a página de login
+    } catch (error) {
+      console.error('Erro ao realizar logout:', error.message);
+      toast.error('Erro ao realizar logout.');
+    }
+  };
 
   return (
     <div className="min-h-screen pt-20 pb-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="font-serif text-3xl text-olive-800 mb-8">Administração</h1>
+      <div className="max-w-4xl mx-auto">
+        {/* Header com Logout */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="font-serif text-3xl text-olive-800">Administração</h1>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
 
+        {/* Configurações */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="font-serif text-xl text-olive-800 mb-4">Configurações</h2>
           <button
             onClick={toggleRSVP}
             className={`px-4 py-2 rounded-md ${
-              rsvpEnabled ? 'bg-red-500 hover:bg-red-600' : 'bg-olive-600 hover:bg-olive-600'
+              rsvpEnabled ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
             } text-white transition-colors`}
           >
             {rsvpEnabled ? 'Desabilitar' : 'Habilitar'} Confirmações
           </button>
         </div>
-            
+
+        {/* Gerenciar Presentes */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="font-serif text-xl text-olive-800 mb-4">Gerenciar Presentes</h2>
           <Link
@@ -125,70 +160,69 @@ function Admin() {
           </Link>
         </div>
 
+        {/* Adicionar Presente */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="font-serif text-xl text-olive-800 mb-4">Adicionar Presente</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Nome do Presente */}
             <div>
               <label className="block text-gray-700 mb-2">Nome do Presente</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-olive-500"
                 required
               />
             </div>
 
+            {/* Preço */}
             <div>
               <label className="block text-gray-700 mb-2">Preço (R$)</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.price}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.length <= 15) { // Permite até 15 caracteres
-                    setFormData({ ...formData, price: value });
-                  }
-                }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-olive-500"
                 required
               />
             </div>
 
+            {/* URL da Imagem */}
             <div>
-            <label className="block text-gray-700 mb-2">URL da Imagem</label>
-            <input
-              type="url"
-              value={formData.image}
-              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
-              required
-            />
-            {formData.image && (
-              <div className="mt-4">
-                <img
-                  src={formData.image}
-                  alt="Pré-visualização"
-                  className="max-w-full h-auto rounded-md border border-gray-300"
-                  style={{ objectFit: "contain" }}
-                />
-              </div>
-            )}
-          </div>
+              <label className="block text-gray-700 mb-2">URL da Imagem</label>
+              <input
+                type="url"
+                value={formData.image}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-olive-500"
+                required
+              />
+              {formData.image && (
+                <div className="mt-4">
+                  <img
+                    src={formData.image}
+                    alt="Pré-visualização"
+                    className="max-w-full h-auto rounded-md border border-gray-300"
+                  />
+                </div>
+              )}
+            </div>
 
-
+            {/* Descrição */}
             <div>
               <label className="block text-gray-700 mb-2">Descrição</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-olive-500"
                 rows={3}
                 required
               />
             </div>
 
+            {/* Lojas Sugeridas */}
             <div>
               <label className="block text-gray-700 mb-2">Lojas Sugeridas</label>
               {formData.stores.map((store, index) => (
@@ -198,7 +232,7 @@ function Admin() {
                     placeholder="Nome da Loja"
                     value={store.name}
                     onChange={(e) => handleStoreChange(index, 'name', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
+                    className="flex-1 px-4 py-2 border rounded-md focus:ring-2 focus:ring-olive-500"
                     required
                   />
                   <input
@@ -206,7 +240,7 @@ function Admin() {
                     placeholder="URL da Loja"
                     value={store.url}
                     onChange={(e) => handleStoreChange(index, 'url', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
+                    className="flex-1 px-4 py-2 border rounded-md focus:ring-2 focus:ring-olive-500"
                     required
                   />
                   {index > 0 && (
@@ -230,6 +264,7 @@ function Admin() {
               </button>
             </div>
 
+            {/* Botão de Enviar */}
             <button
               type="submit"
               disabled={loading}
