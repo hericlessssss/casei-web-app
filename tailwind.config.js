@@ -17,8 +17,7 @@ export default {
           900: '#3d4527',
         },
       },
-      fontFamily: {
-        serif: ['Cormorant Garamond', 'serif'],
+      fontFamily: {     
         sans: ['Montserrat', 'sans-serif'],
       },
     },
