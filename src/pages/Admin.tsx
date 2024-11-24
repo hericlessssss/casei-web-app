@@ -25,12 +25,14 @@ function Admin() {
       const { data, error } = await supabase
         .from('settings')
         .select('rsvp_enabled')
-        .limit(1)
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      if (data) {
-        setRsvpEnabled(data.rsvp_enabled);
+
+      if (data && data.length > 0) {
+        setRsvpEnabled(data[0].rsvp_enabled);
+      } else {
+        toast.error('Nenhuma configuração de RSVP encontrada.');
       }
     } catch (error) {
       console.error('Erro ao buscar status de RSVP:', error.message);

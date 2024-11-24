@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 
 function RSVP() {
   const [formData, setFormData] = useState({
@@ -8,27 +9,73 @@ function RSVP() {
     guests: '0',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRsvpEnabled, setIsRsvpEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRsvpStatus();
+  }, []);
+
+  const fetchRsvpStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('rsvp_enabled')
+        .limit(1);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setIsRsvpEnabled(data[0].rsvp_enabled);
+      } else {
+        toast.error('Nenhuma configuração encontrada para RSVP.');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar status de RSVP:', error.message);
+      toast.error('Erro ao buscar status de RSVP.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     if (!formData.name.trim()) {
-      toast.error('Por favor, informe seu nome');
+      toast.error('Por favor, informe seu nome.');
       return;
     }
-
+  
     setIsSubmitting(true);
+  
+    try {
+      const { error } = await supabase.from('rsvp').insert([
+        {
+          name: formData.name.trim(),
+          guests_count: parseInt(formData.guests, 10),
+        },
+      ]);
+  
+      if (error) throw error;
+  
+      toast.success('Presença confirmada com sucesso! Obrigado!');
+      setFormData({ name: '', guests: '0' });
+    } catch (error) {
+      console.error('Erro ao confirmar presença:', error.message);
+      toast.error('Erro ao confirmar presença.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };  
+  
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    toast.success('Presença confirmada com sucesso! Obrigado!');
-    setFormData({ name: '', guests: '0' });
-    setIsSubmitting(false);
-  };
-
-  const currentDate = new Date();
-  const rsvpStartDate = new Date('2025-05-01');
-  const isRsvpEnabled = currentDate >= rsvpStartDate;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 pb-12 px-4">
@@ -37,10 +84,16 @@ function RSVP() {
           <Users className="w-16 h-16 text-olive-600 mx-auto mb-4" />
           <h1 className="font-serif text-4xl text-olive-800 mb-4">Confirmação de Presença</h1>
           <p className="text-gray-600">
-            {isRsvpEnabled
-              ? 'Ficaremos muito felizes com a sua presença em nosso casamento.'
-              : 'As confirmações de presença estarão disponíveis a partir de maio de 2025.'}
-          </p>
+  {isRsvpEnabled
+    ? 'Ficaremos muito felizes com a sua presença em nosso casamento!'
+    : 'As confirmações de presença estão desabilitadas no momento.'}
+  {isRsvpEnabled && (
+    <span>
+      {' '}
+      Faça a confirmação apenas com o <strong>convite individual</strong> em mãos.
+    </span>
+  )}
+</p>
         </div>
 
         {isRsvpEnabled ? (
@@ -87,9 +140,7 @@ function RSVP() {
           </form>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-600">
-              Aguarde até maio de 2025 para confirmar sua presença.
-            </p>
+            <p className="text-gray-600">As confirmações de presença estarão disponiveis em breve!</p>
           </div>
         )}
       </div>
