@@ -1,138 +1,150 @@
-# Wedding Gift Registry Website
+# 💑 Site do Casamento - Héricles & Bruna
 
-This is a wedding gift registry website built with React, Vite, and Supabase. The site allows guests to view and reserve wedding gifts, and confirm their attendance.
+<div align="center">
 
-## Features
+![Wedding Banner](https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80)
 
-- Gift registry with reservation system
-- RSVP functionality
-- Admin panel for gift management
-- Responsive design optimized for mobile
-- Real-time updates using Supabase
+[![Made with Love](https://img.shields.io/badge/Made%20with-Love-pink.svg)](https://github.com/your-username/wedding-website)
+[![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-green.svg)](https://github.com/your-username/wedding-website)
 
-## Setup Instructions
+</div>
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Create a Supabase account and project at https://supabase.com
-4. Create the following tables in your Supabase database:
--- Habilitar extensão para suporte a UUID
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+Este é um site de casamento construído com React, Vite e Supabase. O site permite que os convidados visualizem e reservem presentes de casamento, além de confirmar sua presença.
 
--- Tabela de Convidados
-CREATE TABLE IF NOT EXISTS guests (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    phone TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+## ✨ Funcionalidades
+
+- 🎁 Lista de presentes com sistema de reserva
+- ✉️ Funcionalidade de RSVP
+- 👑 Painel administrativo para gerenciamento de presentes
+- 📱 Design responsivo otimizado para dispositivos móveis
+- 🔄 Atualizações em tempo real usando Supabase
+- 🔒 Autenticação segura para administradores
+
+## 🚀 Instruções de Configuração
+
+1. Clone o repositório
+2. Instale as dependências: `npm install`
+3. Crie uma conta e projeto no Supabase em https://supabase.com
+4. Crie as seguintes tabelas no seu banco de dados Supabase:
+
+```sql
+-- Criar tabela de presentes
+create table gifts (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  price decimal not null,
+  image text not null,
+  description text not null,
+  suggested_stores jsonb not null,
+  reserved boolean default false,
+  reserved_by text,
+  created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
--- Tabela de Presentes
-CREATE TABLE IF NOT EXISTS gifts (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name TEXT NOT NULL,
-    price NUMERIC(10, 2) NOT NULL,
-    image TEXT NOT NULL,
-    description TEXT NOT NULL,
-    suggested_stores JSONB NOT NULL,
-    reserved BOOLEAN DEFAULT FALSE,
-    reserved_by UUID REFERENCES guests(id), -- Relaciona a quem reservou
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+-- Criar tabela de configurações
+create table settings (
+  id serial primary key,
+  rsvp_enabled boolean default false
 );
 
--- Garantir que cada presente só possa ser reservado uma vez
-CREATE UNIQUE INDEX IF NOT EXISTS unique_gift_reservation 
-ON gifts (id, reserved) WHERE reserved = TRUE;
-
--- Tabela de Configurações
-CREATE TABLE IF NOT EXISTS settings (
-    id SERIAL PRIMARY KEY,
-    rsvp_enabled BOOLEAN DEFAULT FALSE -- Controle para ativar/desativar RSVP
+-- Criar tabela de RSVP
+create table rsvp (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  guests integer not null,
+  created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
--- Tabela de Confirmações de Presença
-CREATE TABLE IF NOT EXISTS rsvp (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    guest_id UUID REFERENCES guests(id) ON DELETE CASCADE, -- Relacionado ao convidado
-    guests_count INTEGER NOT NULL CHECK (guests_count > 0), -- Número de acompanhantes (mínimo 1)
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+-- Criar tabela de administradores
+create table admins (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references auth.users not null,
+  name text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
--- Tabela de Logs de Escolhas (Histórico de Reservas)
-CREATE TABLE IF NOT EXISTS reservation_logs (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    gift_id UUID REFERENCES gifts(id) ON DELETE CASCADE, -- Relacionado ao presente
-    guest_id UUID REFERENCES guests(id) ON DELETE CASCADE, -- Relacionado ao convidado
-    action TEXT NOT NULL CHECK (action IN ('reserved', 'unreserved')), -- Registro da ação
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-);
+-- Inserir configurações iniciais
+insert into settings (id, rsvp_enabled) values (1, false);
 
-7. Run the development server: `npm run dev`
+-- Configurar Row Level Security (RLS)
+alter table gifts enable row level security;
+alter table settings enable row level security;
+alter table rsvp enable row level security;
+alter table admins enable row level security;
 
-## Admin Access
+-- Criar políticas
+create policy "Público pode visualizar presentes" on gifts for select using (true);
+create policy "Admins podem inserir presentes" on gifts for insert with check (exists (select 1 from admins where user_id = auth.uid()));
+create policy "Admins podem atualizar presentes" on gifts for update using (exists (select 1 from admins where user_id = auth.uid()));
+create policy "Admins podem deletar presentes" on gifts for delete using (exists (select 1 from admins where user_id = auth.uid()));
 
-To access the admin panel:
+create policy "Público pode visualizar configurações" on settings for select using (true);
+create policy "Admins podem atualizar configurações" on settings for update using (exists (select 1 from admins where user_id = auth.uid()));
 
-1. Navigate to `/admin` route in your browser
-2. The admin panel allows you to:
-   - Add new gifts to the registry
-   - Enable/disable RSVP functionality
-   - View reserved gifts and RSVP confirmations
-   - Manage gift details and availability
+create policy "Público pode inserir RSVP" on rsvp for insert with check (true);
+create policy "Admins podem visualizar RSVP" on rsvp for select using (exists (select 1 from admins where user_id = auth.uid()));
 
-Note: Currently, the admin panel requires proper authentication setup in Supabase. To implement authentication:
+create policy "Admins podem visualizar lista de admins" on admins for select using (exists (select 1 from admins where user_id = auth.uid()));
+```
 
-1. Enable Email auth provider in Supabase Authentication settings
-2. Create an admin user through Supabase Authentication
-3. Update the admin route to require authentication
-4. Set up proper row level security (RLS) policies in Supabase
+5. Configure a Autenticação no Supabase:
+   - Acesse Authentication > Providers
+   - Habilite o provedor Email
+   - Desabilite "Confirmar email" se desejar acesso imediato
+   - Configure as políticas de senha conforme sua preferência
 
-## Netlify Deployment Configuration
+6. Crie um usuário administrador:
+   - Acesse Authentication > Users
+   - Clique em "Convidar usuário"
+   - Digite o email do administrador
+   - Após criar o usuário, copie seu UUID
+   - Use o editor SQL para inserir o registro de admin:
+   ```sql
+   insert into admins (user_id, name)
+   values ('cole-o-uuid-do-usuario-aqui', 'Nome do Admin');
+   ```
 
-### Build Settings
+7. Copie sua URL e chave anon do Supabase das configurações do projeto
+8. Crie um arquivo `.env` com as seguintes variáveis:
+   ```
+   VITE_SUPABASE_URL=sua_url_supabase
+   VITE_SUPABASE_ANON_KEY=sua_chave_anon_supabase
+   ```
+9. Execute o servidor de desenvolvimento: `npm run dev`
 
-1. **Runtime**: Automatically detected based on your project
-2. **Base directory**: Leave empty (project root)
-3. **Build command**: `npm run build`
-4. **Publish directory**: `dist`
-5. **Functions directory**: `netlify/functions`
+## 👩‍💼 Acesso Administrativo
 
-### Environment Variables
+Para acessar o painel administrativo:
 
-Add the following environment variables in Netlify's site settings:
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+1. Navegue até a rota `/login` no seu navegador
+2. Digite suas credenciais de administrador (email e senha)
+3. Após autenticação bem-sucedida, você será redirecionado para `/admin`
+4. O painel administrativo permite:
+   - Adicionar novos presentes à lista
+   - Habilitar/desabilitar funcionalidade de RSVP
+   - Visualizar presentes reservados e confirmações de RSVP
+   - Gerenciar detalhes e disponibilidade dos presentes
 
-### Deploy Settings
+## 🔒 Recursos de Segurança
 
-1. **Deploy log visibility**: Choose between:
-   - Public logs: Anyone with deploy URL can access logs
-   - Private logs: Only site administrators can access logs
+- Políticas de Row Level Security (RLS) garantem a proteção dos dados
+- Rotas administrativas protegidas por autenticação
+- Gerenciamento de sessão com logout automático
+- Políticas de senha seguras através do Supabase
+- Endpoints da API protegidos
 
-2. **Build status**:
-   - Active builds: Automatic builds on Git push
-   - Stopped builds: Manual deployment only
+## 🚀 Configuração de Deploy no Netlify
 
-### Continuous Deployment
+1. Faça login no Netlify
+2. Conecte seu repositório Git
+3. Configure as variáveis de ambiente:
+   - VITE_SUPABASE_URL
+   - VITE_SUPABASE_ANON_KEY
+4. Configure as opções de build:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+5. Deploy!
 
-1. Connect your GitHub repository
-2. Select the branch to deploy (usually `main` or `master`)
-3. Configure build settings as mentioned above
-4. Deploy the site
+## 💝 Desenvolvido com amor
 
-### Post-Deployment
-
-1. Set up custom domain (if needed)
-2. Configure SSL/TLS certificate
-3. Test the deployed site thoroughly
-4. Monitor build and deployment logs
-
-### Troubleshooting
-
-If builds fail:
-1. Check build logs for errors
-2. Verify environment variables
-3. Ensure build command is correct
-4. Confirm publish directory is set to `dist`
-5. Check if dependencies are properly installed
+Criado com carinho pela [Labora Design](https://www.instagram.com/labora_tech/) - Empresa do casal
