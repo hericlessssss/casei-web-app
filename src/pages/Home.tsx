@@ -1,7 +1,10 @@
 import React from 'react';
 import { Calendar, Clock, MapPin, Instagram } from 'lucide-react';
 import CountdownTimer from '../components/CountdownTimer';
+import { useState } from 'react';
 
+
+const isActive = (path: string) => window.location.pathname === path;
 function Home() {
   return (
     <main className="min-h-screen">
@@ -61,26 +64,34 @@ function Home() {
         </div>
       </section>
 
-      {/* Quick Links Section */}
-      <section className="py-12 px-4 md:px-6 bg-olive-100 text-center">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <p className="text-olive-800 text-lg">
-            <a 
-              href="/gifts" 
-              className="text-olive-600 hover:text-olive-800 underline"
-            >
-              Acesse nossa lista de presentes
-            </a>
-            {' '}e{' '}
-            <a 
-              href="/rsvp" 
-              className="text-olive-600 hover:text-olive-800 underline"
-            >
-              confirme sua presença
-            </a>
-          </p>
-        </div>
-      </section>
+
+    <section className="py-12 px-4 md:px-6 bg-olive-100 text-center">
+      <div className="max-w-4xl mx-auto space-y-4">
+        <p className="text-olive-800 text-lg">
+          <a
+            href="/gifts"
+            className={`${
+              isActive('/gifts')
+                ? 'text-olive-800 font-bold underline'
+                : 'text-olive-600'
+            } hover:text-olive-800 transition-all`}
+          >
+            Acesse nossa lista de presentes
+          </a>
+          {' '}e{' '}
+          <a
+            href="/rsvp"
+            className={`${
+              isActive('/rsvp')
+                ? 'text-olive-800 font-bold underline'
+                : 'text-olive-600'
+            } hover:text-olive-800 transition-all`}
+          >
+            confirme sua presença
+          </a>
+        </p>
+      </div>
+    </section>
 
       {/* Footer */}
       <footer className="py-8 px-4 md:px-6 bg-olive-800 text-white">
