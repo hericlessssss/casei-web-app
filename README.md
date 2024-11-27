@@ -4,8 +4,8 @@
 
 ![Wedding Banner](https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80)
 
-[![Made with Love](https://img.shields.io/badge/Made%20with-Love-pink.svg)](https://github.com/your-username/wedding-website)
-[![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-green.svg)](https://github.com/your-username/wedding-website)
+[![Made with Love](https://img.shields.io/badge/Made%20with-Love-pink.svg)](https://www.instagram.com/labora_tech/)
+[![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-green.svg)](https://hericles-bruna-vao-casar.netlify.app/)
 
 </div>
 
