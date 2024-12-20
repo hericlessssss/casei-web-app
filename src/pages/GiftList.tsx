@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../supabase/supabaseClient'; // Importando o cliente
+import { supabase } from '../supabase/supabaseClient';
 import { Link } from 'react-router-dom';
 import { Gift as GiftIcon } from 'lucide-react';
 
@@ -17,7 +17,7 @@ const GiftList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchGifts() {
+    const fetchGifts = async () => {
       setLoading(true);
       try {
         const { data, error } = await supabase.from<Gift>('gifts').select('*');
@@ -25,7 +25,6 @@ const GiftList: React.FC = () => {
           console.error('Erro ao buscar os dados da API Supabase:', error.message);
           setError('Erro ao carregar a lista de presentes. Tente novamente mais tarde.');
         } else if (data) {
-          // Filtrar IDs duplicados para evitar warnings no React
           const uniqueGifts = data.filter(
             (gift, index, self) => index === self.findIndex((g) => g.id === gift.id)
           );
@@ -37,7 +36,7 @@ const GiftList: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchGifts();
   }, []);
@@ -81,21 +80,26 @@ const GiftList: React.FC = () => {
           {gifts.map((gift) => (
             <div
               key={gift.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02]"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02] flex flex-col justify-between min-h-[350px]"
             >
-              <div className="relative pb-[66.67%]">
-            <img
-              src={gift.image}
-              alt={gift.name}
-              className="absolute top-0 left-0 w-full h-full object-contain"
-            />
-          </div>
+              <div>
+                <div className="relative pb-[66.67%]">
+                  <img
+                    src={gift.image}
+                    alt={gift.name}
+                    className="absolute top-0 left-0 w-full h-full object-contain"
+                  />
+                </div>
 
-              <div className="p-4 md:p-6">
-                <h3 className="font-serif text-lg md:text-xl text-olive-800 mb-2">{gift.name}</h3>
-                <p className="text-gray-600 mb-4">
-                  R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
+                <div className="p-4 md:p-6">
+                  <h3 className="font-serif text-lg md:text-xl text-olive-800 mb-2 line-clamp-2 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>{gift.name}</h3>
+                  <p className="text-gray-600 mb-4">
+                    R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 md:p-6 mt-auto">
                 {gift.reserved ? (
                   <div className="text-olive-600 font-medium flex items-center">
                     <GiftIcon className="w-5 h-5 mr-2" />

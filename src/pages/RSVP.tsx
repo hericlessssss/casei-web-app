@@ -140,7 +140,7 @@ function RSVP() {
           </form>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-600">As confirmações de presença estarão disponiveis em breve!</p>
+            <p className="text-gray-600">As confirmações de presença serão disponibilizadas faltando 2 meses para o casamento =D!</p>
           </div>
         )}
       </div>
