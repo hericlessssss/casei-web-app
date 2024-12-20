@@ -1,4 +1,4 @@
-# 💑 Site do Casamento - Héricles & Bruna
+# 💑 Site do meu casamento - Héricles & Bruna
 
 <div align="center">
 
@@ -9,7 +9,7 @@
 
 </div>
 
-Este é um site de casamento construído com React, Vite e Supabase. O site permite que os convidados visualizem e reservem presentes de casamento, além de confirmar sua presença.
+Esse site utiliza React, Vite e Supabase. O site permite que os convidados visualizem e reservem presentes de casamento, além de confirmar sua presença.
 
 ## ✨ Funcionalidades
 
@@ -147,4 +147,4 @@ Para acessar o painel administrativo:
 
 ## 💝 Desenvolvido com amor
 
-Criado com carinho pela [Labora Design](https://www.instagram.com/labora_tech/) - Empresa do casal
+por [Labora Design](https://www.instagram.com/labora_tech/)
