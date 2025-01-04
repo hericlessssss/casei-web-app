@@ -147,4 +147,4 @@ Para acessar o painel administrativo:
 
 ## 💝 Desenvolvido com amor
 
-por [Labora Design](https://www.instagram.com/labora_tech/)
+por [Labora Tech](https://www.instagram.com/labora_tech/)
