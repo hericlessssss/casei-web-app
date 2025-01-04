@@ -127,7 +127,7 @@ function Home() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center space-x-2 hover:text-olive-200 transition-colors"
               >
-                <span>Labora Design</span>
+                <span>Labora Tech</span>
                 <Instagram className="w-5 h-5" />
               </a>
             </div>
