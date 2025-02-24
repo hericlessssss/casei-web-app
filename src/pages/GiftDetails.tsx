@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ExternalLink, Gift as GiftIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { supabase } from '../supabase/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 interface Store {
   name: string;
@@ -66,47 +66,43 @@ function GiftDetails() {
       return;
     }
 
+    if (!gift?.id) {
+      toast.error('Erro ao identificar o presente.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Tentar encontrar o convidado pelo nome
-      const { data: guestData, error: guestError } = await supabase
-        .from('guests')
-        .select('id')
-        .eq('name', name.trim())
+      // First check if the gift is still available
+      const { data: currentGift } = await supabase
+        .from('gifts')
+        .select('reserved')
+        .eq('id', gift.id)
         .single();
 
-      let guestId = guestData?.id;
-
-      // Se o convidado não existir, cria um novo
-      if (!guestId) {
-        const { data: newGuest, error: newGuestError } = await supabase
-          .from('guests')
-          .insert({ name })
-          .select('id')
-          .single();
-
-        if (newGuestError) {
-          throw new Error('Erro ao criar convidado: ' + newGuestError.message);
-        }
-
-        guestId = newGuest.id;
-      }
-
-      // Atualizar o presente com o ID do convidado
-      const { error: giftError } = await supabase
-        .from('gifts')
-        .update({ reserved: true, reserved_by: guestId })
-        .eq('id', gift?.id);
-
-      if (giftError) {
-        toast.error('Erro ao reservar o presente.');
-      } else {
-        toast.success('Presente reservado com sucesso! Obrigado!');
+      if (currentGift?.reserved) {
+        toast.error('Este presente já foi reservado por outra pessoa.');
         navigate('/gifts');
+        return;
       }
+
+      // If still available, update the gift
+      const { error: updateError } = await supabase
+        .from('gifts')
+        .update({ 
+          reserved: true, 
+          reserved_by: name.trim() 
+        })
+        .eq('id', gift.id);
+
+      if (updateError) throw updateError;
+
+      toast.success('Presente reservado com sucesso! Obrigado!');
+      navigate('/gifts');
     } catch (err) {
-      toast.error('Erro inesperado ao reservar o presente.');
+      console.error('Erro ao reservar presente:', err);
+      toast.error('Erro ao reservar o presente. Por favor, tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -133,21 +129,24 @@ function GiftDetails() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="md:flex">
-
-          <div className="md:w-1/2">
-            <img
-              src={gift.image}
-              alt={gift.name}
-              className="w-full h-64 md:h-full object-contain"
-            />
-          </div>
-
+            <div className="md:w-1/2">
+              <img
+                src={gift.image}
+                alt={gift.name}
+                className="w-full h-64 md:h-full object-contain"
+              />
+            </div>
             
             <div className="p-8 md:w-1/2">
-            <h1 className="font-serif text-3xl text-olive-800 mb-4">{gift.name}</h1>
-              <p className="text-2xl text-olive-600 mb-4">
-                R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </p>
+              <h1 className="font-serif text-3xl text-olive-800 mb-4">{gift.name}</h1>
+              <div className="mb-4">
+                <p className="text-2xl text-olive-600">
+                  Preço médio: R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-sm text-gray-500 mt-1 italic">
+                  *O preço pode variar conforme a loja e a data da compra
+                </p>
+              </div>
               <p className="text-gray-600 mb-6">{gift.description}</p>
 
               <div className="mb-8">
@@ -172,7 +171,6 @@ function GiftDetails() {
                 </div>
               </div>
 
-
               {gift.reserved ? (
                 <div className="text-olive-600 font-medium flex items-center">
                   <GiftIcon className="w-5 h-5 mr-2" />
@@ -191,6 +189,7 @@ function GiftDetails() {
                       onChange={(e) => setName(e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
                       placeholder="Digite seu nome completo"
+                      required
                     />
                   </div>
                   <button

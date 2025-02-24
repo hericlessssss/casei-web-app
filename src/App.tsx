@@ -6,11 +6,12 @@ import Home from './pages/Home';
 import GiftList from './pages/GiftList';
 import GiftDetails from './pages/GiftDetails';
 import RSVP from './pages/RSVP';
+import Messages from './pages/Messages';
 import Footer from './components/Footer';
 import Admin from './pages/Admin';
 import GiftManagement from './pages/GiftManagement';
 import PrivateRoute from './components/PrivateRoute';
-import Login from './pages/Login'; // Certifique-se de que esta página exista
+import Login from './pages/Login';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/gifts" element={<GiftList />} />
           <Route path="/gifts/:id" element={<GiftDetails />} />
           <Route path="/rsvp" element={<RSVP />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/login" element={<Login />} />
           <Route
             path="/admin"

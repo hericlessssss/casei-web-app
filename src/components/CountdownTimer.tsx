@@ -43,7 +43,6 @@ function CountdownTimer({ targetDate }: Props) {
     return () => clearTimeout(timer);
   });
 
-  // Mapeamento para traduzir os termos para português
   const unitTranslations: { [key: string]: string } = {
     days: 'Dias',
     hours: 'Horas',
@@ -53,20 +52,22 @@ function CountdownTimer({ targetDate }: Props) {
 
   return (
     <div className="grid grid-cols-4 gap-4 text-center">
-  {Object.entries(timeLeft).map(([unit, value]) => (
-    <div
-      key={unit}
-      className="bg-white bg-opacity-20 backdrop-blur-lg rounded-lg p-4 flex flex-col items-center"
-    >
-      <div className="text-2xl md:text-4xl font-bold">{value}</div>
-      <div className="text-xs md:text-sm uppercase">{unitTranslations[unit] || unit}</div>
+      {Object.entries(timeLeft).map(([unit, value], index) => (
+        <div
+          key={unit}
+          className={`bg-white bg-opacity-20 backdrop-blur-lg rounded-lg p-4 flex flex-col items-center animate-fade-scale hover-grow animate-soft-glow`}
+          style={{ animationDelay: `${index * 200}ms` }}
+        >
+          <div className="text-2xl md:text-4xl font-bold animate-gentle-wave">
+            {value}
+          </div>
+          <div className="text-xs md:text-sm uppercase mt-2 animate-float-in" style={{ animationDelay: `${(index * 200) + 300}ms` }}>
+            {unitTranslations[unit] || unit}
+          </div>
+        </div>
+      ))}
     </div>
-  ))}
-</div>
-
-
   );
 }
-
 
 export default CountdownTimer;

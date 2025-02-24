@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
+
+interface Message {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
+}
 
 function Admin() {
   const [formData, setFormData] = useState({
@@ -14,11 +22,49 @@ function Admin() {
   });
   const [rsvpEnabled, setRsvpEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchRSVPStatus();
+    fetchMessages();
   }, []);
+
+  const fetchMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar mensagens:', error);
+      toast.error('Erro ao carregar mensagens');
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const deleteMessage = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success('Mensagem excluída com sucesso!');
+      fetchMessages();
+    } catch (error) {
+      console.error('Erro ao excluir mensagem:', error);
+      toast.error('Erro ao excluir mensagem');
+    }
+  };
 
   const fetchRSVPStatus = async () => {
     try {
@@ -117,7 +163,7 @@ function Admin() {
       if (error) throw error;
 
       toast.success('Logout realizado com sucesso.');
-      navigate('/login'); // Redireciona para a página de login
+      navigate('/login');
     } catch (error) {
       console.error('Erro ao realizar logout:', error.message);
       toast.error('Erro ao realizar logout.');
@@ -162,6 +208,48 @@ function Admin() {
           </Link>
         </div>
 
+        {/* Messages Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="font-serif text-xl text-olive-800 mb-6">Mensagens dos Convidados</h2>
+          
+          {loadingMessages ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-600"></div>
+            </div>
+          ) : messages.length === 0 ? (
+            <p className="text-center text-gray-600">Nenhuma mensagem recebida ainda.</p>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div key={message.id} className="bg-olive-50 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-medium text-olive-800">{message.name}</h3>
+                      <p className="text-sm text-gray-600">{message.email}</p>
+                    </div>
+                    <button
+                      onClick={() => deleteMessage(message.id)}
+                      className="text-red-500 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <p className="text-gray-700">{message.message}</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    {new Date(message.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Adicionar Presente */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="font-serif text-xl text-olive-800 mb-4">Adicionar Presente</h2>
@@ -180,7 +268,7 @@ function Admin() {
 
             {/* Preço */}
             <div>
-              <label className="block text-gray-700 mb-2">Preço (R$)</label>
+              <label className="block text-gray-700 mb-2">Preço Médio (R$)</label>
               <input
                 type="number"
                 step="0.01"
@@ -189,6 +277,9 @@ function Admin() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-olive-500"
                 required
               />
+              <p className="text-sm text-gray-500 mt-1 italic">
+                *Insira um valor médio de referência, pois o preço pode variar conforme a loja e a data da compra
+              </p>
             </div>
 
             {/* URL da Imagem */}

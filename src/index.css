@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,10 +6,12 @@
 @layer base {
   html {
     font-family: 'Montserrat', sans-serif;
+    scroll-behavior: smooth;
+    font-size: 14px;
   }
 
   body {
-    @apply text-base antialiased;
+    @apply text-base antialiased bg-olive-50;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -21,10 +23,222 @@
   }
 }
 
+/* Animações Personalizadas */
+@keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+@keyframes fadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes softGlow {
+  0% {
+    box-shadow: 0 0 5px rgba(112, 133, 66, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(112, 133, 66, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(112, 133, 66, 0.2);
+  }
+}
+
+@keyframes gentleWave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Classes de Animação */
+.animate-float-in {
+  animation: floatIn 1s ease-out forwards;
+}
+
+.animate-fade-scale {
+  animation: fadeScale 0.8s ease-out forwards;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 2s infinite ease-in-out;
+}
+
+.animate-soft-glow {
+  animation: softGlow 3s infinite ease-in-out;
+}
+
+.animate-gentle-wave {
+  animation: gentleWave 3s infinite ease-in-out;
+}
+
+/* Atrasos de Animação */
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+/* Elementos com Hover */
+.hover-grow {
+  transition: transform 0.3s ease;
+}
+
+.hover-grow:hover {
+  transform: scale(1.02);
+}
+
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgba(112, 133, 66, 0.3);
+}
+
+/* Seção Hero */
 .hero-section {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80");
+  background-image: url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
+  animation: fadeScale 1.5s ease-out forwards;
+}
+
+/* Ajuste para textos longos */
+.text-content {
+  @apply text-base leading-relaxed;
+}
+
+/* Ajuste para textos de interface */
+.text-ui {
+  @apply text-sm leading-normal;
+}
+
+/* Ajuste para cabeçalhos secundários */
+.text-subtitle {
+  @apply text-lg font-medium;
+}
+
+/* Animações para Cards */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Animação para Links */
+.link-hover {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.link-hover::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+.link-hover:hover::after {
+  width: 100%;
+}
+
+/* Animação para Botões */
+.button-hover {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.button-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.5s ease;
+}
+
+.button-hover:hover::before {
+  left: 100%;
+}
+
+/* Animação para Imagens */
+.image-hover {
+  transition: all 0.5s ease;
+  filter: brightness(1);
+}
+
+.image-hover:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
 }

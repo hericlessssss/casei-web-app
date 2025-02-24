@@ -17,7 +17,14 @@ function Login() {
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      navigate('/admin');
+      const { data: adminData, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('user_id', session.user.id);
+
+      if (!error && adminData && adminData.length > 0) {
+        navigate('/admin');
+      }
     }
   };
 
@@ -37,10 +44,11 @@ function Login() {
         const { data: adminData, error: adminError } = await supabase
           .from('admins')
           .select('*')
-          .eq('user_id', data.user.id)
-          .single();
+          .eq('user_id', data.user.id);
 
-        if (adminError || !adminData) {
+        if (adminError) throw adminError;
+        
+        if (!adminData || adminData.length === 0) {
           await supabase.auth.signOut();
           throw new Error('Acesso não autorizado');
         }

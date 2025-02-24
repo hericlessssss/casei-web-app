@@ -18,14 +18,14 @@ function PrivateRoute({ children }: PrivateRouteProps) {
           const { data: adminData, error } = await supabase
             .from('admins')
             .select('*')
-            .eq('user_id', session.user.id)
-            .single();
+            .eq('user_id', session.user.id);
 
           if (error) {
             console.error('Erro ao verificar admin:', error.message);
             setIsAuthenticated(false);
           } else {
-            setIsAuthenticated(!!adminData);
+            // Check if there's at least one admin record for this user
+            setIsAuthenticated(adminData && adminData.length > 0);
           }
         } else {
           setIsAuthenticated(false);
