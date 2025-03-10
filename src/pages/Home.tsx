@@ -22,6 +22,7 @@ function Home() {
         const { data, error } = await supabase
           .from('gifts')
           .select('id, name, price, image, reserved')
+          .eq('reserved', false) // Apenas presentes não reservados
           .limit(8)
           .order('created_at', { ascending: true });
 
@@ -173,79 +174,74 @@ function Home() {
       </section>
 
       {/* Gift Preview Section */}
-      <section className="py-20 px-4 md:px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl md:text-4xl text-olive-800 mb-4">Lista de Presentes</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Sua presença é nosso maior presente, mas se desejar nos presentear,
-              preparamos esta lista com muito carinho.
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-600"></div>
+      {gifts.length > 0 && (
+        <section className="py-20 px-4 md:px-6 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-3xl md:text-4xl text-olive-800 mb-4">Lista de Presentes</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Sua presença é nosso maior presente, mas se desejar nos presentear,
+                preparamos esta lista com muito carinho.
+              </p>
             </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {gifts.map((gift) => (
-                  <div
-                    key={gift.id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 flex flex-col h-full"
-                  >
-                    <div className="relative pb-[66.67%]">
-                      <img
-                        src={gift.image}
-                        alt={gift.name}
-                        className="absolute top-0 left-0 w-full h-full object-contain"
-                      />
-                    </div>
-                    <div className="p-4 md:p-6 flex flex-col flex-grow">
-                      <div className="flex-grow">
-                        <h3 className="font-serif text-lg text-olive-800 mb-4 line-clamp-2">
-                          {gift.name}
-                        </h3>
-                      </div>
 
-                      <div className="border-t pt-4">
-                        <p className="text-xl font-semibold text-olive-800 mb-4">
-                          R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </p>
-                        
-                        {gift.reserved ? (
-                          <div className="text-olive-600 font-medium flex items-center">
-                            <Gift className="w-5 h-5 mr-2" />
-                            Presente já escolhido
-                          </div>
-                        ) : (
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-600"></div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  {gifts.map((gift) => (
+                    <div
+                      key={gift.id}
+                      className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 flex flex-col h-full"
+                    >
+                      <div className="relative pb-[66.67%]">
+                        <img
+                          src={gift.image}
+                          alt={gift.name}
+                          className="absolute top-0 left-0 w-full h-full object-contain"
+                        />
+                      </div>
+                      <div className="p-4 md:p-6 flex flex-col flex-grow">
+                        <div className="flex-grow">
+                          <h3 className="font-serif text-lg text-olive-800 mb-4 line-clamp-2">
+                            {gift.name}
+                          </h3>
+                        </div>
+
+                        <div className="border-t pt-4">
+                          <p className="text-xl font-semibold text-olive-800 mb-4">
+                            R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </p>
+                          
                           <Link
                             to={`/gifts/${gift.id}`}
                             className="inline-block w-full text-center bg-olive-600 text-white px-4 py-2 rounded-md hover:bg-olive-700 transition-colors"
                           >
                             Escolher presente
                           </Link>
-                        )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              <div className="text-center">
-                <Link
-                  to="/gifts"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-olive-600 text-white rounded-md hover:bg-olive-700 transition-colors"
-                >
-                  <span>Ver lista completa</span>
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
-      </section>
+                <div className="text-center">
+                  <Link
+                    to="/gifts"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-olive-600 text-white rounded-md hover:bg-olive-700 transition-colors"
+                  >
+                    <span>Ver lista completa</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* RSVP and Actions Section */}
       <section className="py-20 px-4 md:px-6 bg-olive-100">
@@ -303,7 +299,7 @@ function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm hover:text-olive-200 transition-colors"
-                >
+                 >
                   <Instagram className="w-4 h-4" />
                   <span>@hericlesssssss</span>
                 </a>

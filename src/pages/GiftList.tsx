@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Link } from 'react-router-dom';
-import { Gift as GiftIcon } from 'lucide-react';
+import { Gift as GiftIcon, Filter } from 'lucide-react';
 
 interface Gift {
   id: string;
@@ -9,13 +9,15 @@ interface Gift {
   price: number;
   image: string;
   reserved: boolean;
-  reserved_by?: string;
 }
+
+type FilterType = 'all' | 'available' | 'reserved';
 
 const GiftList: React.FC = () => {
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FilterType>('all');
 
   useEffect(() => {
     fetchGifts();
@@ -27,6 +29,7 @@ const GiftList: React.FC = () => {
       const { data, error } = await supabase
         .from('gifts')
         .select('*')
+        .order('reserved', { ascending: true })
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -42,6 +45,17 @@ const GiftList: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const filteredGifts = gifts.filter(gift => {
+    switch (filter) {
+      case 'available':
+        return !gift.reserved;
+      case 'reserved':
+        return gift.reserved;
+      default:
+        return true;
+    }
+  });
 
   if (loading) {
     return (
@@ -72,17 +86,33 @@ const GiftList: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="font-serif text-3xl md:text-4xl text-olive-800 mb-4">Lista de Presentes</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 max-w-2xl mx-auto mb-8">
             Sua presença é o nosso maior presente, mas se desejar nos presentear,
             preparamos esta lista com muito carinho.
           </p>
+
+          {/* Filtro */}
+          <div className="flex justify-center items-center gap-4 mb-8">
+            <Filter className="w-5 h-5 text-olive-600" />
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as FilterType)}
+              className="px-4 py-2 rounded-md border border-olive-200 bg-white text-olive-800 focus:outline-none focus:ring-2 focus:ring-olive-500"
+            >
+              <option value="all">Todos os presentes</option>
+              <option value="available">Presentes disponíveis</option>
+              <option value="reserved">Presentes já escolhidos</option>
+            </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-          {gifts.map((gift) => (
+          {filteredGifts.map((gift) => (
             <div
               key={gift.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 flex flex-col h-full"
+              className={`bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 flex flex-col h-full ${
+                gift.reserved ? 'opacity-75' : ''
+              }`}
             >
               <div className="relative pb-[66.67%]">
                 <img
@@ -108,9 +138,9 @@ const GiftList: React.FC = () => {
                   </p>
                   
                   {gift.reserved ? (
-                    <div className="text-olive-600 font-medium flex items-center">
+                    <div className="text-olive-600 font-medium flex items-center justify-center p-3 bg-olive-50 rounded-md">
                       <GiftIcon className="w-5 h-5 mr-2" />
-                      Presente escolhido por {gift.reserved_by}
+                      Este presente já foi escolhido com carinho por alguém especial ❤️
                     </div>
                   ) : (
                     <Link

@@ -16,7 +16,6 @@ interface Gift {
   description: string;
   image: string;
   reserved: boolean;
-  reserved_by?: string;
   suggested_stores: Store[];
 }
 
@@ -84,7 +83,7 @@ function GiftDetails() {
         .single();
 
       if (currentGift?.reserved) {
-        toast.error('Este presente já foi reservado por outra pessoa.');
+        toast.error('Este presente já foi escolhido por outra pessoa.');
         navigate('/gifts');
         return;
       }
@@ -131,9 +130,9 @@ function GiftDetails() {
       <div className="min-h-screen pt-20 px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
           <GiftIcon className="w-16 h-16 text-olive-600 mx-auto mb-4" />
-          <h1 className="font-serif text-2xl text-olive-800 mb-4">Presente já reservado</h1>
+          <h1 className="font-serif text-2xl text-olive-800 mb-4">Presente já escolhido</h1>
           <p className="text-gray-600 mb-6">
-            Este presente já foi escolhido por {gift.reserved_by}.
+            Este presente já foi escolhido com carinho por alguém especial ❤️
           </p>
           <button
             onClick={() => navigate('/gifts')}
