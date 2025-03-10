@@ -29,34 +29,36 @@ function GiftDetails() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function fetchGift() {
-      if (!id) {
-        toast.error('ID do presente inválido.');
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('gifts')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) {
-          toast.error('Erro ao buscar o presente.');
-        } else {
-          setGift(data);
-        }
-      } catch (err) {
-        toast.error('Erro inesperado ao buscar o presente.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchGift();
   }, [id]);
+
+  const fetchGift = async () => {
+    if (!id) {
+      toast.error('ID do presente inválido.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('gifts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        toast.error('Erro ao buscar o presente.');
+        navigate('/gifts');
+      } else {
+        setGift(data);
+      }
+    } catch (err) {
+      toast.error('Erro inesperado ao buscar o presente.');
+      navigate('/gifts');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +76,7 @@ function GiftDetails() {
     setIsSubmitting(true);
 
     try {
-      // First check if the gift is still available
+      // Primeiro, verifica se o presente ainda está disponível
       const { data: currentGift } = await supabase
         .from('gifts')
         .select('reserved')
@@ -87,7 +89,7 @@ function GiftDetails() {
         return;
       }
 
-      // If still available, update the gift
+      // Se ainda estiver disponível, atualiza o presente
       const { error: updateError } = await supabase
         .from('gifts')
         .update({ 
@@ -111,7 +113,7 @@ function GiftDetails() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Carregando dados do presente...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-600"></div>
       </div>
     );
   }
@@ -120,6 +122,26 @@ function GiftDetails() {
     return (
       <div className="min-h-screen pt-20 px-4 flex items-center justify-center">
         <p className="text-gray-600">Presente não encontrado.</p>
+      </div>
+    );
+  }
+
+  if (gift.reserved) {
+    return (
+      <div className="min-h-screen pt-20 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
+          <GiftIcon className="w-16 h-16 text-olive-600 mx-auto mb-4" />
+          <h1 className="font-serif text-2xl text-olive-800 mb-4">Presente já reservado</h1>
+          <p className="text-gray-600 mb-6">
+            Este presente já foi escolhido por {gift.reserved_by}.
+          </p>
+          <button
+            onClick={() => navigate('/gifts')}
+            className="bg-olive-600 text-white px-6 py-3 rounded-md hover:bg-olive-700 transition-colors"
+          >
+            Voltar para a lista de presentes
+          </button>
+        </div>
       </div>
     );
   }
@@ -152,55 +174,44 @@ function GiftDetails() {
               <div className="mb-8">
                 <h2 className="font-serif text-xl text-olive-800 mb-3">Onde comprar:</h2>
                 <div className="space-y-2">
-                  {gift.suggested_stores?.length > 0 ? (
-                    gift.suggested_stores.map((store, index) => (
-                      <a
-                        key={store.url + index}
-                        href={store.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-olive-600 hover:text-olive-700"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        {store.name || "Loja sem nome"}
-                      </a>
-                    ))
-                  ) : (
-                    <p className="text-gray-600">Nenhuma loja disponível no momento.</p>
-                  )}
+                  {gift.suggested_stores?.map((store, index) => (
+                    <a
+                      key={index}
+                      href={store.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-olive-600 hover:text-olive-700"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      {store.name}
+                    </a>
+                  ))}
                 </div>
               </div>
 
-              {gift.reserved ? (
-                <div className="text-olive-600 font-medium flex items-center">
-                  <GiftIcon className="w-5 h-5 mr-2" />
-                  Presente já escolhido por {gift.reserved_by || 'alguém'}.
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="name" className="block text-gray-700 mb-2">
+                    Seu nome
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
+                    placeholder="Digite seu nome completo"
+                    required
+                  />
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-700 mb-2">
-                      Seu nome
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
-                      placeholder="Digite seu nome completo"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-olive-600 text-white px-6 py-3 rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50"
-                  >
-                    {isSubmitting ? 'Confirmando...' : 'Confirmar escolha'}
-                  </button>
-                </form>
-              )}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-olive-600 text-white px-6 py-3 rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Confirmando...' : 'Confirmar escolha'}
+                </button>
+              </form>
             </div>
           </div>
         </div>

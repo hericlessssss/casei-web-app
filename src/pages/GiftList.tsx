@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import { Gift as GiftIcon } from 'lucide-react';
 
 interface Gift {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
   reserved: boolean;
+  reserved_by?: string;
 }
 
 const GiftList: React.FC = () => {
@@ -17,34 +18,35 @@ const GiftList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchGifts = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase.from<Gift>('gifts').select('*');
-        if (error) {
-          console.error('Erro ao buscar os dados da API Supabase:', error.message);
-          setError('Erro ao carregar a lista de presentes. Tente novamente mais tarde.');
-        } else if (data) {
-          const uniqueGifts = data.filter(
-            (gift, index, self) => index === self.findIndex((g) => g.id === gift.id)
-          );
-          setGifts(uniqueGifts);
-        }
-      } catch (err) {
-        console.error('Erro inesperado ao buscar presentes:', err);
-        setError('Erro inesperado ao carregar a lista de presentes.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchGifts();
   }, []);
+
+  const fetchGifts = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('gifts')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Erro ao buscar os dados:', error.message);
+        setError('Erro ao carregar a lista de presentes. Tente novamente mais tarde.');
+      } else if (data) {
+        setGifts(data);
+      }
+    } catch (err) {
+      console.error('Erro inesperado ao buscar presentes:', err);
+      setError('Erro inesperado ao carregar a lista de presentes.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600 text-lg">Carregando presentes...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-600"></div>
       </div>
     );
   }
@@ -108,7 +110,7 @@ const GiftList: React.FC = () => {
                   {gift.reserved ? (
                     <div className="text-olive-600 font-medium flex items-center">
                       <GiftIcon className="w-5 h-5 mr-2" />
-                      Presente já escolhido
+                      Presente escolhido por {gift.reserved_by}
                     </div>
                   ) : (
                     <Link
