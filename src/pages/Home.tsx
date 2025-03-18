@@ -108,7 +108,7 @@ function Home() {
                     <span>14:30</span>
                   </p>
                   <a
-                    href="https://lh3.googleusercontent.com/p/AF1QipP9AwwJdS7hwJiXG4TrcSinB2BpVb6qBZ_9aTc3=s1360-w1360-h1020"
+                    href="https://maps.app.goo.gl/VqgcaBKHtUTZZ2VL7"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-olive-600 hover:text-olive-800 transition-colors"
@@ -120,7 +120,7 @@ function Home() {
               </div>
               <div className="md:w-1/2">
                 <img
-                  src="https://maps.app.goo.gl/VqgcaBKHtUTZZ2VL7"
+                  src="https://lh3.googleusercontent.com/p/AF1QipP9AwwJdS7hwJiXG4TrcSinB2BpVb6qBZ_9aTc3=s1360-w1360-h1020"
                   alt="Paróquia Nossa Senhora do Perpétuo Socorro"
                   className="w-full h-64 object-cover rounded-lg"
                 />
