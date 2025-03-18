@@ -120,7 +120,7 @@ function Home() {
               </div>
               <div className="md:w-1/2">
                 <img
-                  src="https://lh3.googleusercontent.com/p/AF1QipP9AwwJdS7hwJiXG4TrcSinB2BpVb6qBZ_9aTc3=s1360-w1360-h1020"
+                  src="https://maps.app.goo.gl/VqgcaBKHtUTZZ2VL7"
                   alt="Paróquia Nossa Senhora do Perpétuo Socorro"
                   className="w-full h-64 object-cover rounded-lg"
                 />
