@@ -125,26 +125,6 @@ function GiftDetails() {
     );
   }
 
-  if (gift.reserved) {
-    return (
-      <div className="min-h-screen pt-20 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
-          <GiftIcon className="w-16 h-16 text-olive-600 mx-auto mb-4" />
-          <h1 className="font-serif text-2xl text-olive-800 mb-4">Presente já escolhido</h1>
-          <p className="text-gray-600 mb-6">
-            Este presente já foi escolhido com carinho por alguém especial ❤️
-          </p>
-          <button
-            onClick={() => navigate('/gifts')}
-            className="bg-olive-600 text-white px-6 py-3 rounded-md hover:bg-olive-700 transition-colors"
-          >
-            Voltar para a lista de presentes
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen pt-20 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -188,29 +168,38 @@ function GiftDetails() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-gray-700 mb-2">
-                    Seu nome
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
-                    placeholder="Digite seu nome completo"
-                    required
-                  />
+              {!gift.reserved ? (
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-4">
+                    <label htmlFor="name" className="block text-gray-700 mb-2">
+                      Seu nome
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-olive-500"
+                      placeholder="Digite seu nome completo"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-olive-600 text-white px-6 py-3 rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Confirmando...' : 'Confirmar escolha'}
+                  </button>
+                </form>
+              ) : (
+                <div className="text-center p-6 bg-olive-50 rounded-lg">
+                  <GiftIcon className="w-12 h-12 text-olive-600 mx-auto mb-4" />
+                  <p className="text-olive-800 text-lg">
+                    Este presente já foi escolhido com carinho por alguém especial ❤️
+                  </p>
                 </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-olive-600 text-white px-6 py-3 rounded-md hover:bg-olive-700 transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Confirmando...' : 'Confirmar escolha'}
-                </button>
-              </form>
+              )}
             </div>
           </div>
         </div>

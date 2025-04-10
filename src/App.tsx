@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -12,8 +12,15 @@ import Admin from './pages/Admin';
 import GiftManagement from './pages/GiftManagement';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
+import { setupKeepAlive } from './lib/keepAlive';
 
 function App() {
+  useEffect(() => {
+    // Configura o keep-alive quando o app iniciar
+    const cleanup = setupKeepAlive();
+    return cleanup;
+  }, []);
+
   return (
     <Router>
       <div className="min-h-screen bg-olive-50">

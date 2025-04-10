@@ -19,6 +19,7 @@ Esse site utiliza React, Vite e Supabase. O site permite que os convidados visua
 - 📱 Design responsivo otimizado para dispositivos móveis
 - 🔄 Atualizações em tempo real usando Supabase
 - 🔒 Autenticação segura para administradores
+- 🔌 Keep-alive automático para manter o banco de dados ativo
 
 ## 🚀 Instruções de Configuração
 
@@ -111,6 +112,43 @@ create policy "Admins podem visualizar lista de admins" on admins for select usi
    VITE_SUPABASE_ANON_KEY=sua_chave_anon_supabase
    ```
 9. Execute o servidor de desenvolvimento: `npm run dev`
+
+## 🔄 Configurando o Keep-Alive (Edge Function)
+
+Para manter o banco de dados ativo e evitar que ele entre em modo de espera, siga estas etapas:
+
+1. Acesse o painel do Supabase e vá para a seção "Edge Functions"
+
+2. Clique em "New Function" e crie uma função chamada "keep-alive"
+
+3. No Supabase Dashboard, vá para Project Settings > API e copie:
+   - Project URL
+   - Project API keys (anon key)
+
+4. Configure as variáveis de ambiente da Edge Function:
+   - No painel do Supabase, vá para Edge Functions
+   - Selecione a função "keep-alive"
+   - Clique em "Settings"
+   - Adicione as seguintes variáveis:
+     ```
+     SUPABASE_URL=sua_url_do_projeto
+     SUPABASE_ANON_KEY=sua_chave_anon
+     ```
+
+5. Deploy da Edge Function:
+   - No terminal, navegue até a pasta do projeto
+   - Execute os seguintes comandos:
+     ```bash
+     supabase login
+     supabase link --project-ref seu-project-ref
+     supabase functions deploy keep-alive
+     ```
+
+6. Verifique se a função está funcionando:
+   - Acesse a URL da função: `https://[PROJECT_REF].supabase.co/functions/v1/keep-alive`
+   - Você deve ver uma resposta JSON com status "success"
+
+A Edge Function será chamada automaticamente a cada 5 minutos para manter o banco de dados ativo.
 
 ## 👩‍💼 Acesso Administrativo
 
